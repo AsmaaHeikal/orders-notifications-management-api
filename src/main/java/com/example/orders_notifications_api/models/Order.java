@@ -21,92 +21,77 @@ enum OrderStatus {
 }
 
 public abstract class Order {
-    private double orderTotal;
-    private double shippingFees;
-    private OrderStatus status;
+    protected double orderTotal;
+    protected final double shippingFees=20;
+    protected OrderStatus status;
+    protected String id;
+    protected Customer customer;
+    protected String shippingAddress;
+    protected ArrayList<Product> products;
 
-    abstract double calculateOrderTotal();
-
-    abstract double calculateShippingFees();
-
-    abstract void ship();
-
-    abstract OrderStatus getStatus();
-}
-class SimpleOrder extends Order {
-
-    private String productId;
-    private double price;
-
-    public SimpleOrder(String productId, double price) {
-        this.productId = productId;
-        this.price = price;
-    }
-
-    @Override
     public double calculateOrderTotal() {
-        return price;
-    }
-
-    @Override
-    public double calculateShippingFees() {
-        // Simple orders might not have shipping fees
-        return 0;
-    }
-
-    @Override
-    public void ship() {
-        // Simple orders do not need shipping logic
-        System.out.println("SimpleOrder with Product ID " + productId + " has been shipped.");
-    }
-
-    @Override
-    public OrderStatus getStatus() {
-        // Simple orders might not have a status, return a default value
-        return OrderStatus.PLACED;
-    }
-}
-class CompoundOrder extends Order {
-
-    private List<Order> orderComponents = new ArrayList<>();
-
-    @Override
-    public double calculateOrderTotal() {
+        //the order total is the sum of the prices of all products in the order
         double total = 0;
-        for (Order orderComponent : orderComponents) {
-            total += orderComponent.calculateOrderTotal();
+        for (Product product :products) {
+            total += product.getPrice();
         }
         return total;
     }
-
-    @Override
-    public double calculateShippingFees() {
-        double fees = 0;
-        for (Order orderComponent : orderComponents) {
-            fees += orderComponent.calculateShippingFees();
-        }
-        return fees;
+    public void ship(){
+        status = OrderStatus.SHIPPED;
     }
-
-    @Override
-    public void ship() {
-        for (Order orderComponent : orderComponents) {
-            orderComponent.ship();
-        }
-        System.out.println("CompoundOrder has been shipped.");
+    public Order() {
+        products = new ArrayList<Product>();
     }
-
-    @Override
-    public OrderStatus getStatus() {
-        // Compound orders might not have a single status, return a default value
-        return OrderStatus.PLACED;
+    public Order(String id, Customer customer, String shippingAddress) {
+        this.id = id;
+        this.customer = customer;
+        this.shippingAddress = shippingAddress;
+        products = new ArrayList<Product>();
     }
-
-    public void addOrderComponent(Order orderComponent) {
-        orderComponents.add(orderComponent);
+    public void addProduct(Product product) {
+        products.add(product);
     }
-
-    public void removeOrderComponent(Order orderComponent) {
-        orderComponents.remove(orderComponent);
+    public void removeProduct(Product product) {
+        products.remove(product);
+    }
+    public ArrayList<Product> getProducts() {
+        return products;
+    }
+    public void setProducts(ArrayList<Product> products) {
+        this.products = products;
+    }
+    OrderStatus getStatus(){
+        return status;
+    }
+    public double getOrderTotal() {
+        return orderTotal;
+    }
+    public void setOrderTotal(double orderTotal) {
+        this.orderTotal = orderTotal;
+    }
+    public double getShippingFees() {
+        return shippingFees;
+    }
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+    public Customer getCustomerId() {
+        return customer;
+    }
+    public void setCustomerId(Customer customer) {
+        this.customer = customer;
+    }
+    public String getShippingAddress() {
+        return shippingAddress;
+    }
+    public void setShippingAddress(String shippingAddress) {
+        this.shippingAddress = shippingAddress;
     }
 }
