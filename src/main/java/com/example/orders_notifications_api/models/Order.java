@@ -1,97 +1,113 @@
 package com.example.orders_notifications_api.models;
 
-import java.util.ArrayList;
-import java.util.List;
-
-enum OrderStatus {
-    PLACED("Placed"),
-    SHIPPED("Shipped"),
-    CANCELED("Canceled");
-
-    private final String status;
-
-    OrderStatus(String status) {
-        this.status = status;
-    }
-
-    @Override
-    public String toString() {
-        return status;
-    }
-}
+import com.example.orders_notifications_api.models.common.OrderStatus;
+import com.example.orders_notifications_api.repository.ProductsDB;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class Order {
     protected double orderTotal;
-    protected final double shippingFees=20;
+    protected final double shippingFees = 20;
     protected OrderStatus status;
     protected String id;
-    protected Customer customer;
+    protected String customerId;
     protected String shippingAddress;
-    protected ArrayList<Product> products;
+    protected Map<String, Integer> productsAndQuantity= new HashMap<>();
 
     public double calculateOrderTotal() {
-        //the order total is the sum of the prices of all products in the order
+        // the order total is the sum of the prices of all products in the order
         double total = 0;
-        for (Product product :products) {
-            total += product.getPrice();
+        ProductsDB productsDB = new ProductsDB();
+        for (Map.Entry<String, Integer> entry : productsAndQuantity.entrySet()) {
+            String productId = entry.getKey();
+            int quantity = entry.getValue();
+            Product product = productsDB.getProductBySerialNumber(productId);
+            if (product != null) {
+                total += product.getPrice() * quantity;
+            }
         }
         return total;
     }
-    public void ship(){
-        status = OrderStatus.SHIPPED;
-    }
     public Order() {
-        products = new ArrayList<Product>();
+        productsAndQuantity = new HashMap<>();
     }
-    public Order(String id, Customer customer, String shippingAddress) {
+
+    public Order(String id, String customerId, String shippingAddress) {
         this.id = id;
-        this.customer = customer;
+        this.customerId = customerId;
         this.shippingAddress = shippingAddress;
-        products = new ArrayList<Product>();
     }
-    public void addProduct(Product product) {
-        products.add(product);
+
+    public boolean addProduct(String productId, int quantity) {
+        ProductsDB productsDB = new ProductsDB();
+        if (productsDB.getProductBySerialNumber(productId) != null) {
+            if (productsDB.getProductBySerialNumber(productId).getRemainingParts() >= quantity) {
+                productsDB.deductRemainingParts(productId, quantity);
+                productsAndQuantity.put(productId, quantity);
+                return true;
+            }
+        }
+        return false;
     }
-    public void removeProduct(Product product) {
-        products.remove(product);
+
+    public boolean removeProduct(String productId) {
+        if (productsAndQuantity.containsKey(productId)) {
+            productsAndQuantity.remove(productId);
+            return true;
+        }
+        return false;
     }
-    public ArrayList<Product> getProducts() {
-        return products;
+
+    public Map<String, Integer> getProductsAndQuantity() {
+        return productsAndQuantity;
     }
-    public void setProducts(ArrayList<Product> products) {
-        this.products = products;
+
+    public void setProductsAndQuantity(Map<String, Integer> productsAndQuantity) {
+        this.productsAndQuantity = productsAndQuantity;
     }
-    OrderStatus getStatus(){
+
+    public OrderStatus getStatus() {
         return status;
     }
+
     public double getOrderTotal() {
         return orderTotal;
     }
+
     public void setOrderTotal(double orderTotal) {
         this.orderTotal = orderTotal;
     }
+
     public double getShippingFees() {
         return shippingFees;
     }
+
     public void setStatus(OrderStatus status) {
         this.status = status;
     }
+
     public String getId() {
         return id;
     }
+
     public void setId(String id) {
         this.id = id;
     }
-    public Customer getCustomerId() {
-        return customer;
+
+    public String getCustomerId() {
+        return customerId;
     }
-    public void setCustomerId(Customer customer) {
-        this.customer = customer;
+
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
+
     public String getShippingAddress() {
         return shippingAddress;
     }
+
     public void setShippingAddress(String shippingAddress) {
         this.shippingAddress = shippingAddress;
     }
 }
+

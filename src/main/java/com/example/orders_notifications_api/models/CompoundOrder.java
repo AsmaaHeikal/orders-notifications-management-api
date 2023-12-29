@@ -2,20 +2,24 @@ package com.example.orders_notifications_api.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CompoundOrder extends Order {
-    private List<Order> orderComponents = new ArrayList<>();
+    private ArrayList<Order> orderComponents;
 
-    public CompoundOrder(String orderId, Customer customer, String shippingAddress) {
-        super(orderId, customer, shippingAddress);
+    public CompoundOrder(String orderId, String customerId, String shippingAddress, ArrayList<Order> orderComponents) {
+        super(orderId, customerId, shippingAddress);
+        this.orderComponents = orderComponents;
     }
 
     public List<Order> getOrderComponents() {
         return orderComponents;
     }
-    public void setOrderComponents(List<Order> orderComponents) {
+
+    public void setOrderComponents(ArrayList<Order> orderComponents) {
         this.orderComponents = orderComponents;
     }
+
     public void addOrderComponent(Order orderComponent) {
         orderComponents.add(orderComponent);
     }

@@ -1,25 +1,28 @@
 package com.example.orders_notifications_api.dto;
 
-import com.example.orders_notifications_api.models.Customer;
-import com.example.orders_notifications_api.models.Order;
+import com.example.orders_notifications_api.models.*;
 
 import java.util.List;
 
 public class PlaceCompoundOrderRequest {
     private String orderId;
-    private Customer customer;
+    private Customer mainCustomer;
     private String shippingAddress;
-    private List<Order> orderComponents;
+    private List<CustomerOrderDetails> customerOrderDetailsList;
+
+    // Constructors, getters, and setters
+
     public PlaceCompoundOrderRequest() {
-        // Default constructor
     }
 
-    public PlaceCompoundOrderRequest(String orderId, Customer customer, String shippingAddress, List<Order> orderComponents) {
+    public PlaceCompoundOrderRequest(String orderId, Customer mainCustomer, String shippingAddress, List<CustomerOrderDetails> customerOrderDetailsList) {
         this.orderId = orderId;
-        this.customer = customer;
+        this.mainCustomer = mainCustomer;
         this.shippingAddress = shippingAddress;
-        this.orderComponents = orderComponents;
+        this.customerOrderDetailsList = customerOrderDetailsList;
     }
+
+    // Getters and setters
 
     public String getOrderId() {
         return orderId;
@@ -29,12 +32,12 @@ public class PlaceCompoundOrderRequest {
         this.orderId = orderId;
     }
 
-    public Customer getCustomer() {
-        return customer;
+    public Customer getMainCustomer() {
+        return mainCustomer;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setMainCustomer(Customer mainCustomer) {
+        this.mainCustomer = mainCustomer;
     }
 
     public String getShippingAddress() {
@@ -45,12 +48,11 @@ public class PlaceCompoundOrderRequest {
         this.shippingAddress = shippingAddress;
     }
 
-    public List<Order> getOrderComponents() {
-        return orderComponents;
+    public List<CustomerOrderDetails> getCustomerOrderDetailsList() {
+        return customerOrderDetailsList;
     }
 
-    public void setOrderComponents(List<Order> orderComponents) {
-        this.orderComponents = orderComponents;
+    public void setCustomerOrderDetailsList(List<CustomerOrderDetails> customerOrderDetailsList) {
+        this.customerOrderDetailsList = customerOrderDetailsList;
     }
-
 }

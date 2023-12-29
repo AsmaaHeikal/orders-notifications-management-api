@@ -3,14 +3,27 @@ package com.example.orders_notifications_api.dto;
 import com.example.orders_notifications_api.models.Customer;
 import com.example.orders_notifications_api.models.Product;
 
-import java.util.List;
+import java.util.Map;
 
 public class PlaceSimpleOrderRequest {
-
     private String orderId;
-    private Customer customer;
+    private String customerId;
     private String shippingAddress;
-    private List<Product> products;
+    private Map<String, Integer> productsAndQuantity;
+
+    // Constructors, getters, and setters
+
+    public PlaceSimpleOrderRequest() {
+    }
+
+    public PlaceSimpleOrderRequest(String orderId, String customerId, String shippingAddress, Map<String, Integer> productsAndQuantity) {
+        this.orderId = orderId;
+        this.customerId = customerId;
+        this.shippingAddress = shippingAddress;
+        this.productsAndQuantity = productsAndQuantity;
+    }
+
+    // Getters and setters
 
     public String getOrderId() {
         return orderId;
@@ -20,12 +33,12 @@ public class PlaceSimpleOrderRequest {
         this.orderId = orderId;
     }
 
-    public Customer getCustomer() {
-        return customer;
+    public String getCustomerId() {
+        return customerId;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setCustomerId(String customerId) {
+        this.customerId = customerId;
     }
 
     public String getShippingAddress() {
@@ -36,12 +49,11 @@ public class PlaceSimpleOrderRequest {
         this.shippingAddress = shippingAddress;
     }
 
-    public List<Product> getProducts() {
-        return products;
+    public Map<String, Integer> getProductsAndQuantity() {
+        return productsAndQuantity;
     }
 
-    public void setProducts(List<Product> products) {
-        this.products = products;
+    public void setProductsAndQuantity(Map<String, Integer> productsAndQuantity) {
+        this.productsAndQuantity = productsAndQuantity;
     }
 }
-

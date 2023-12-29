@@ -64,8 +64,8 @@ public class ProductsDB {
         return true;
     }
 
-    public boolean deductRemainingParts(String name, int quantity){
-        Product product = getProductByName(name);
+    public boolean deductRemainingParts(String id, int quantity){
+        Product product = getProductBySerialNumber(id);
         if(product == null){
             return false;
         }

@@ -48,4 +48,13 @@ public class CustomerDB {
         }
         return null;
     }
+    //deduct balance
+    public boolean deductBalance(String id, double amount){
+        Customer customer = getCustomerById(id);
+        if(customer == null||customer.getBalance() < amount){
+            return false;
+        }
+        customer.deductBalance(amount);
+        return true;
+    }
 }
