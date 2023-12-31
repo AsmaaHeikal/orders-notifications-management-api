@@ -10,7 +10,7 @@ public class CustomerDB {
     public ArrayList<Customer>customers;
     public CustomerDB() {
         //add some customers to the list
-        customers = new ArrayList<Customer>();
+        customers = new ArrayList<>();
         customers.add(new Customer("1", "Ahmed", 1000, "Ahmed@gmail.com","123456"));
         customers.add(new Customer("2", "Mohamed", 2000, "Mohamed99@gmail.com","qwert"));
     }
@@ -33,7 +33,7 @@ public class CustomerDB {
         }
         return null;
     }
-    public boolean addCustomer(Customer customer){
+    public boolean  addCustomer(Customer customer){
         if(getCustomerById(customer.getId()) != null){
             return false;
         }
@@ -56,5 +56,15 @@ public class CustomerDB {
         }
         customer.deductBalance(amount);
         return true;
+
+    }
+    public boolean AddingToBalance(String id, double amount){
+        Customer customer = getCustomerById(id);
+        if(customer == null){
+            return false;
+        }
+        customer.AddToBalance(amount);
+        return true;
+
     }
 }

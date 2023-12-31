@@ -75,5 +75,13 @@ public class ProductsDB {
         product.setRemainingParts(product.getRemainingParts() - quantity);
         return true;
     }
+    public boolean AddReturnedProducts(String id, int quantity){
+        Product product = getProductBySerialNumber(id);
+        if(product == null){
+            return false;
+        }
+        product.setRemainingParts(product.getRemainingParts() + quantity);
+        return true;
+    }
 
 }

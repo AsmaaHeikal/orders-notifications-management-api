@@ -1,9 +1,9 @@
 package com.example.orders_notifications_api.services;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.time.LocalDateTime;
+import java.util.*;
 
+import com.example.orders_notifications_api.models.common.OrderStatus;
 import org.springframework.stereotype.Service;
 
 import com.example.orders_notifications_api.factories.NotificationTemplateFactory;
@@ -14,7 +14,14 @@ import com.example.orders_notifications_api.types.*;
 @Service
 public class NotificationService {
 
+    StatisticsService stat = new StatisticsService();
     private final Queue<Notification> notificationQueue = new LinkedList<>();
+
+    List<Notification>AllNotifications;
+
+    private void notifyStat(){
+        stat.updateStat(this);
+    }
 
     public Notification createNotification(
             NotificationType notificationType,
@@ -34,6 +41,9 @@ public class NotificationService {
         Notification notification = template.createNotification(recipient, language, channel, notificationType, status,
                 subject, args);
         enqueueNotification(notification);
+        AllNotifications.add(notification);
+        notifyStat();
+
         return notification;
     }
 
@@ -54,6 +64,9 @@ public class NotificationService {
 
     private void enqueueNotification(Notification notification) {
         notificationQueue.add(notification);
+    }
+    private void dequeueNotification(Notification notification) {
+        notificationQueue.remove(notification);
     }
 
     public List<Notification> getQueuedNotifications() {
@@ -87,7 +100,30 @@ public class NotificationService {
     }
 
     private void sendNotification(Notification notification) {
-        System.out.println("Sending notification: " + notification);
-        notification.setStatus(NotificationStatus.SENT);
+
+        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime notifyTime = notification.getPlacementTime().plus(notification.NOTIFICATION_DELAY);
+        if(notifyTime.isAfter(currentTime)){
+            System.out.println("Sending notification: " + notification);
+            notification.setStatus(NotificationStatus.SENT);
+            dequeueNotification(notification);
+        }
     }
+
+//    public boolean () {
+//        LocalDateTime currentTime = LocalDateTime.now();
+//        LocalDateTime cancellationTime = placementTime.plus(CANCELLATION_DURATION);
+//
+//        if(currentTime.isAfter(cancellationTime)){
+//            status = OrderStatus.SHIPPED;
+//        }
+//        // Check if the current time is after the calculated cancellation time
+//        return currentTime.isBefore(cancellationTime);
+//    }
+
+
+
+
+
+
 }

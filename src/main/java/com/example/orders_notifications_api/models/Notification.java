@@ -6,8 +6,10 @@ import lombok.AllArgsConstructor;
 
 import com.example.orders_notifications_api.types.*;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class Notification {
     private String recipient;
@@ -17,4 +19,24 @@ public class Notification {
     private Language language;
     private NotificationChannel channel;
     private NotificationStatus status;
+    public static final Duration NOTIFICATION_DELAY = Duration.ofSeconds(3);
+
+    public LocalDateTime getPlacementTime() {
+        return placementTime;
+    }
+
+    protected LocalDateTime placementTime;
+
+    public Notification() {
+        this.placementTime = LocalDateTime.now();
+    }
+
+    public NotificationType getType() {
+        return type;
+    }
+
+
+
+
+
 }

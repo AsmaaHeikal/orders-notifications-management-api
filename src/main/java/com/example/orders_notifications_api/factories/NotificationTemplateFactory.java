@@ -11,6 +11,8 @@ public class NotificationTemplateFactory {
                 return new OrderPlacementTemplate();
             case ORDER_SHIPMENT:
                 return new OrderShipmentTemplate();
+            case ORDER_CANCELLATION:
+                return new OrderCancellationTemplate();
             default:
                 throw new IllegalArgumentException("Unknown notification type: " + type);
         }

@@ -4,15 +4,29 @@ import com.example.orders_notifications_api.models.common.OrderStatus;
 import com.example.orders_notifications_api.repository.ProductsDB;
 import java.util.HashMap;
 import java.util.Map;
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 
 public abstract class Order {
     protected double orderTotal;
-    protected final double shippingFees = 20;
+
+    public void setShippingFees(double shippingFees) {
+        this.shippingFees = shippingFees;
+    }
+
+    protected double shippingFees = 20;
     protected OrderStatus status;
     protected String id;
     protected String customerId;
     protected String shippingAddress;
     protected Map<String, Integer> productsAndQuantity= new HashMap<>();
+
+    private static final Duration CANCELLATION_DURATION = Duration.ofMinutes(2);
+    protected LocalDateTime placementTime;
+
+
+
 
     public double calculateOrderTotal() {
         // the order total is the sum of the prices of all products in the order
@@ -36,8 +50,19 @@ public abstract class Order {
         this.id = id;
         this.customerId = customerId;
         this.shippingAddress = shippingAddress;
+        this.placementTime = LocalDateTime.now();
     }
 
+    public boolean isEligibleForCancellation() {
+        LocalDateTime currentTime = LocalDateTime.now();
+        LocalDateTime cancellationTime = placementTime.plus(CANCELLATION_DURATION);
+
+        if(currentTime.isAfter(cancellationTime)){
+            status = OrderStatus.DELIVERED;
+        }
+        // Check if the current time is after the calculated cancellation time
+        return currentTime.isBefore(cancellationTime);
+    }
     public boolean addProduct(String productId, int quantity) {
         ProductsDB productsDB = new ProductsDB();
         if (productsDB.getProductBySerialNumber(productId) != null) {

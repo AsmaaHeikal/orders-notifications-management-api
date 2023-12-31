@@ -48,4 +48,5 @@ public class NotificationController {
         List<Notification> queuedNotifications = notificationService.getQueuedNotifications();
         return ResponseEntity.ok(queuedNotifications);
     }
+
 }

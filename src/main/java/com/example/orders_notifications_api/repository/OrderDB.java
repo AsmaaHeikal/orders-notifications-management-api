@@ -1,6 +1,7 @@
 package com.example.orders_notifications_api.repository;
 
 import com.example.orders_notifications_api.models.Order;
+import com.example.orders_notifications_api.models.Product;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -36,4 +37,5 @@ public class OrderDB {
         orders.remove(order);
         return true;
     }
+
 }

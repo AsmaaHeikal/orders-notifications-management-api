@@ -15,6 +15,11 @@ public class OrderService {
 
     OrderDB orderDB;
     ProductsDB productDB;
+
+    public CustomerDB getCustomerDB() {
+        return customerDB;
+    }
+
     CustomerDB customerDB ;
 
     public OrderService() {
@@ -146,7 +151,7 @@ public class OrderService {
     // Helper method to deduct shipping fees from the customer's balance
     public void customerDeductShippingFees(Order order) {
         double shippingFees = order.getShippingFees();
-        if(!customerDB.deductBalance(order.getCustomerId(),shippingFees)){
+        if(!customerDB.deductBalance(order.getCustomerId(), shippingFees)){
             throw new IllegalArgumentException("Customer " + order.getCustomerId() + " doesn't exist or doesn't have enough balance");
         }
     }
@@ -175,5 +180,97 @@ public class OrderService {
 
     public List<Customer> getAllCustomers() {
         return customerDB.getAllCustomers();
+    }
+
+    public void customerRefundShippingFees(Order order) {
+        double shippingFees = order.getShippingFees();
+        if(!customerDB.AddingToBalance(order.getCustomerId(), shippingFees)){
+            throw new IllegalArgumentException("Customer " + order.getCustomerId() + " doesn't exist");
+        }
+    }
+    public void customerRefundOrderFees(Order order) {
+        double orderFees = order.getOrderTotal();
+        if(!customerDB.AddingToBalance(order.getCustomerId(), orderFees)){
+            throw new IllegalArgumentException("Customer " + order.getCustomerId() + " doesn't exist");
+        }
+    }
+
+    private void RefundShippingFees(Order order) {
+        if (order instanceof SimpleOrder) {
+            customerRefundShippingFees(order);
+        } else if (order instanceof CompoundOrder) {
+            for (Order orderComponent : ((CompoundOrder) order).getOrderComponents()) {
+                customerRefundShippingFees(orderComponent);
+
+            }
+        }else throw new RuntimeException("This Order Doesnt Exist");
+    }
+    private void RefundOrderFees(Order order) {
+        if (order instanceof SimpleOrder) {
+            customerRefundOrderFees(order);
+        } else if (order instanceof CompoundOrder) {
+            for (Order orderComponent : ((CompoundOrder) order).getOrderComponents()) {
+                customerRefundOrderFees(orderComponent);
+            }
+        }else throw new RuntimeException("This Order Doesnt Exist");
+    }
+
+    public void CancelOrder(Order order){
+
+        if(order!=null){
+            if (order instanceof SimpleOrder) {
+                if (order.isEligibleForCancellation() && (order.getStatus() != OrderStatus.DELIVERED)) {
+
+                    if(order.getStatus() == OrderStatus.SHIPPED){
+                    RefundShippingFees(order);
+                    }
+                    RefundOrderFees(order);
+                    order.getProductsAndQuantity().forEach((productId, value) ->{
+                        productDB.AddReturnedProducts(productId,value);
+                    });
+                    order.setStatus(OrderStatus.CANCELLED_ORDER);
+                    orderDB.deleteOrder(order.getId());
+
+
+                }
+            } else if (order instanceof CompoundOrder) {
+
+                for (Order orderComponent : ((CompoundOrder) order).getOrderComponents()) {
+                    if (orderComponent.isEligibleForCancellation() && (orderComponent.getStatus() != OrderStatus.DELIVERED)) {
+                        CancelOrder(orderComponent);
+                    }
+
+                }
+                order.setStatus(OrderStatus.CANCELLED_ORDER);
+                orderDB.deleteOrder(order.getId());
+            }
+        }else throw new RuntimeException("This Order Doesnt Exist");
+
+
+    }
+
+    public void CancelOrderShipping(Order order){
+        if (order!=null){
+            if (order instanceof SimpleOrder) {
+                if (order.isEligibleForCancellation() && (order.getStatus() != OrderStatus.DELIVERED ||order.getStatus() != OrderStatus.CANCELLED_SHIPPING)) {
+                    RefundShippingFees(order);
+                    order.setShippingFees(0);
+                    order.setStatus(OrderStatus.CANCELLED_SHIPPING);
+                }
+            } else if (order instanceof CompoundOrder) {
+
+                for (Order orderComponent : ((CompoundOrder) order).getOrderComponents()) {
+                    if (orderComponent.isEligibleForCancellation() && (order.getStatus() != OrderStatus.DELIVERED ||order.getStatus() != OrderStatus.CANCELLED_SHIPPING)) {
+                        CancelOrderShipping(orderComponent);
+                    }
+
+                }
+                RefundShippingFees(order);
+                order.setShippingFees(0);
+                order.setStatus(OrderStatus.CANCELLED_SHIPPING);
+
+
+            }
+        }else throw new RuntimeException("This Order Doesnt Exist");
     }
 }

@@ -51,6 +51,7 @@ public class Customer {
     public void deductBalance(double amount){
         balance -= amount;
     }
+    public void AddToBalance(double amount){balance += amount;}
     public String toString(){
         return id+"::"+balance+"::"+email;
     }
