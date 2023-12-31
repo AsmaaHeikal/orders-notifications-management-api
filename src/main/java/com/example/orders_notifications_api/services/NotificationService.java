@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import com.example.orders_notifications_api.models.common.OrderStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.orders_notifications_api.factories.NotificationTemplateFactory;
@@ -13,11 +14,20 @@ import com.example.orders_notifications_api.types.*;
 
 @Service
 public class NotificationService {
-
+@Autowired
     StatisticsService stat = new StatisticsService();
+
+    public Queue<Notification> getNotificationQueue() {
+        return notificationQueue;
+    }
+
+    public ArrayList<Notification> getAllNotifications() {
+        return AllNotifications;
+    }
+
     private final Queue<Notification> notificationQueue = new LinkedList<>();
 
-    List<Notification>AllNotifications;
+    ArrayList<Notification> AllNotifications = new ArrayList<>();
 
     private void notifyStat(){
         stat.updateStat(this);
@@ -58,7 +68,6 @@ public class NotificationService {
         Language language = Language.EN;
         Notification notification = createNotification(notificationType, defaultSubject, recipient, language, channel,
                 status, args);
-        enqueueNotification(notification);
         return notification;
     }
 
@@ -109,21 +118,5 @@ public class NotificationService {
             dequeueNotification(notification);
         }
     }
-
-//    public boolean () {
-//        LocalDateTime currentTime = LocalDateTime.now();
-//        LocalDateTime cancellationTime = placementTime.plus(CANCELLATION_DURATION);
-//
-//        if(currentTime.isAfter(cancellationTime)){
-//            status = OrderStatus.SHIPPED;
-//        }
-//        // Check if the current time is after the calculated cancellation time
-//        return currentTime.isBefore(cancellationTime);
-//    }
-
-
-
-
-
 
 }

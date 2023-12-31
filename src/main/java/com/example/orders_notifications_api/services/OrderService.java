@@ -3,6 +3,9 @@ package com.example.orders_notifications_api.services;
 import com.example.orders_notifications_api.models.*;
 import com.example.orders_notifications_api.models.common.OrderStatus;
 import com.example.orders_notifications_api.repository.*;
+import com.example.orders_notifications_api.types.NotificationChannel;
+import com.example.orders_notifications_api.types.NotificationStatus;
+import com.example.orders_notifications_api.types.NotificationType;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,16 +19,20 @@ public class OrderService {
     OrderDB orderDB;
     ProductsDB productDB;
 
-    public CustomerDB getCustomerDB() {
-        return customerDB;
+    CustomerDB customerDB ;
+
+    public NotificationService getNotificationService() {
+        return notificationService;
     }
 
-    CustomerDB customerDB ;
+    NotificationService notificationService;
 
     public OrderService() {
         orderDB = new OrderDB();
         productDB = new ProductsDB();
         customerDB = new CustomerDB();
+        notificationService = new NotificationService();
+
     }
 
     // Method to place a simple order
@@ -60,6 +67,9 @@ public class OrderService {
         if(!customerDB.deductBalance(customerId, simpleOrder.getOrderTotal())){
             throw new IllegalArgumentException("Customer " + customerId + " doesn't exist or doesn't have enough balance");
         }
+        notificationService.createNotification(NotificationType.ORDER_PLACEMENT,customerDB.getCustomerById(customerId).getEmail(), NotificationChannel.EMAIL, NotificationStatus.PENDING,customerDB.getCustomerById(customerId).getName(),orderDB.getOrderById(orderId).getProductsAndQuantity());
+        notificationService.processAndSendNotifications();
+
         return simpleOrder;
     }
 
@@ -112,6 +122,9 @@ public class OrderService {
             friendOrder.setOrderTotal(friendOrder.calculateOrderTotal());
             friendOrder.setStatus(OrderStatus.PLACED);
             orderComponents.add(friendOrder);
+            notificationService.createNotification(NotificationType.ORDER_PLACEMENT,details.getCustomer().getEmail(), NotificationChannel.EMAIL, NotificationStatus.PENDING,friendCustomer.getName(),friendOrder.getProductsAndQuantity());
+            notificationService.processAndSendNotifications();
+
         }
 
         // Create the compound order with the list of order components
@@ -131,6 +144,7 @@ public class OrderService {
             }
         }
 
+
         return compoundOrder;
     }
 
@@ -140,10 +154,16 @@ public class OrderService {
         order.setStatus(OrderStatus.SHIPPED);
         if (order instanceof SimpleOrder) {
             customerDeductShippingFees((SimpleOrder) order);
+            notificationService.createNotification(NotificationType.ORDER_SHIPMENT,customerDB.getCustomerById(order.getCustomerId()).getEmail(), NotificationChannel.EMAIL, NotificationStatus.PENDING,customerDB.getCustomerById(order.getCustomerId()).getName(),order.getProductsAndQuantity(),order.getShippingAddress());
+            notificationService.processAndSendNotifications();
+
         } else if (order instanceof CompoundOrder) {
             for (Order orderComponent : ((CompoundOrder) order).getOrderComponents()) {
                 customerDeductShippingFees(orderComponent);
                 orderComponent.setStatus(OrderStatus.SHIPPED);
+                notificationService.createNotification(NotificationType.ORDER_SHIPMENT,customerDB.getCustomerById(order.getCustomerId()).getEmail(), NotificationChannel.EMAIL, NotificationStatus.PENDING,customerDB.getCustomerById(order.getCustomerId()).getName(),order.getProductsAndQuantity());
+                notificationService.processAndSendNotifications();
+
             }
         }
     }
@@ -230,7 +250,8 @@ public class OrderService {
                     });
                     order.setStatus(OrderStatus.CANCELLED_ORDER);
                     orderDB.deleteOrder(order.getId());
-
+                    notificationService.createNotification(NotificationType.ORDER_CANCELLATION,customerDB.getCustomerById(order.getCustomerId()).getEmail(), NotificationChannel.EMAIL, NotificationStatus.PENDING,customerDB.getCustomerById(order.getCustomerId()).getName(),order.getProductsAndQuantity());
+                    notificationService.processAndSendNotifications();
 
                 }
             } else if (order instanceof CompoundOrder) {

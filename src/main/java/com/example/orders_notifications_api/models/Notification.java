@@ -19,7 +19,7 @@ public class Notification {
     private Language language;
     private NotificationChannel channel;
     private NotificationStatus status;
-    public static final Duration NOTIFICATION_DELAY = Duration.ofSeconds(3);
+    public static final Duration NOTIFICATION_DELAY = Duration.ofSeconds(40);
 
     public LocalDateTime getPlacementTime() {
         return placementTime;

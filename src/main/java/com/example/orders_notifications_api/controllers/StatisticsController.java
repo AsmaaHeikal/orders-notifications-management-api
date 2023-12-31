@@ -3,28 +3,42 @@ import com.example.orders_notifications_api.models.*;
 import com.example.orders_notifications_api.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import com.example.orders_notifications_api.dto.*;
 
 
+import java.util.ArrayList;
+import java.util.Queue;
 
-import java.util.List;
 @RestController
 @RequestMapping("/stats")
 public class StatisticsController {
+    @Autowired
     private final StatisticsService statisticsService;
     @Autowired
+    private final OrderService orderService;
 
-    public StatisticsController(StatisticsService statisticsService) {
+    @Autowired
+    public StatisticsController(StatisticsService statisticsService, OrderService orderService) {
         this.statisticsService = statisticsService;
+        this.orderService = orderService;
     }
-    @PostMapping("/MostNotifiedEmail")
-    public String getMostNotifiedEmail(@RequestBody NotificationService request){
-        return statisticsService.MostNotifiedEmail(request);
+
+
+    @GetMapping("/MostNotifiedEmail")
+    public String getMostNotifiedEmail(){
+        return statisticsService.MostNotifiedEmail(orderService.getNotificationService());
 
     }
-    @PostMapping("/MostSentTemplate")
-    public String getMostSentTemplate(@RequestBody NotificationService request){
-        return statisticsService.MostSentNotificationTemplate(request);
+    @GetMapping("/MostSentTemplate")
+    public String getMostSentTemplate(){
+        return statisticsService.MostSentNotificationTemplate(orderService.getNotificationService());
 
+    }
+    @GetMapping("/all")
+    public ArrayList<Notification> getAll() {
+        return statisticsService.getAllNotifications(orderService.getNotificationService());
+    }
+    @GetMapping("/queue")
+    public Queue<Notification> getQueue() {
+        return statisticsService.getNotificationQueue(orderService.getNotificationService());
     }
 }

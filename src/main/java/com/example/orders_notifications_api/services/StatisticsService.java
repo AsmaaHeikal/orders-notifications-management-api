@@ -1,39 +1,60 @@
 package com.example.orders_notifications_api.services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 
 import com.example.orders_notifications_api.models.Notification;
+import com.example.orders_notifications_api.models.Product;
+import com.example.orders_notifications_api.templates.NotificationTemplate;
+import com.example.orders_notifications_api.types.NotificationType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+
+
 @Service
 public class StatisticsService {
 
-    public void updateStat(NotificationService n){
-        String Email = MostNotifiedEmail(n);
-        String Template = MostSentNotificationTemplate(n);
+    public void updateStat(NotificationService notificationService){
+        String Email = MostNotifiedEmail(notificationService);
+        String Template = MostSentNotificationTemplate(notificationService);
     }
-    public String MostSentNotificationTemplate(NotificationService notify){
+    public String MostSentNotificationTemplate(NotificationService notificationService){
         String  mostRepeated= null;
-        int maxFreq = 0;
+        int cancel=0,place=0,ship=0;
         Map<String, Integer> frequencyMap = new HashMap<>();
-        for(Notification n : notify.AllNotifications){
-            int freq = frequencyMap.getOrDefault(n.getType().toLower(),0);
-            frequencyMap.put(n.getType().toLower(),freq);
-
-            if(freq>maxFreq){
-                maxFreq = freq;
-                mostRepeated = n.getType().toLower();
+        for(Notification n : notificationService.AllNotifications){
+            if(n.getType() == NotificationType.ORDER_CANCELLATION ){
+                cancel++;
+            }else if(n.getType() == NotificationType.ORDER_PLACEMENT ){
+                place++;
+            }else if(n.getType() == NotificationType.ORDER_SHIPMENT ){
+                ship++;
             }
-            return mostRepeated;
+            if(ship>place){
+                if(ship>cancel){
+                    mostRepeated=NotificationType.ORDER_SHIPMENT.toLower();
+                }else if(ship==cancel) mostRepeated=NotificationType.ORDER_CANCELLATION.toLower()+" "+NotificationType.ORDER_SHIPMENT.toLower();
+                else mostRepeated=NotificationType.ORDER_CANCELLATION.toLower();
+            }else if(place>ship){
+                if(place>cancel){
+                    mostRepeated=NotificationType.ORDER_PLACEMENT.toLower();
+                }else if(place==cancel) mostRepeated=NotificationType.ORDER_CANCELLATION.toLower()+" "+NotificationType.ORDER_PLACEMENT.toLower();
+                else mostRepeated=NotificationType.ORDER_CANCELLATION.toLower();
+            }else if (place==ship) mostRepeated=NotificationType.ORDER_SHIPMENT.toLower()+" "+NotificationType.ORDER_PLACEMENT.toLower();
+            else mostRepeated=NotificationType.ORDER_CANCELLATION.toLower()+" "+NotificationType.ORDER_PLACEMENT.toLower()+" "+NotificationType.ORDER_PLACEMENT.toLower();
+
         }
-        return null;
+        return mostRepeated;
     }
 
-    public String MostNotifiedEmail(NotificationService notify){
+    public String MostNotifiedEmail(NotificationService notificationService){
         String  mostRepeated= null;
         int maxFreq = 0;
         Map<String, Integer> frequencyMap = new HashMap<>();
-        for(Notification n : notify.AllNotifications){
+        for(Notification n : notificationService.AllNotifications){
             if(n.getChannel().toLower().equals("email")){
                 int freq = frequencyMap.getOrDefault(n.getRecipient(), 0);
                 frequencyMap.put(n.getRecipient(), freq);
@@ -45,7 +66,14 @@ public class StatisticsService {
                 return mostRepeated;
             }
         }
-        return null;
+        return mostRepeated;
     }
+    public ArrayList<Notification> getAllNotifications(NotificationService notificationService){
+        return notificationService.getAllNotifications();
+    }
+    public Queue<Notification> getNotificationQueue(NotificationService notificationService){
+        return notificationService.getNotificationQueue();
+    }
+
 
 }
